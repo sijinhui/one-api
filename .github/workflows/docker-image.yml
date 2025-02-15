@@ -40,6 +40,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
+          registry: registry.si.icu
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -55,8 +56,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ contains(github.ref, 'alpha') && 'justsong/one-api-alpha' || 'justsong/one-api' }}
-            ${{ contains(github.ref, 'alpha') && format('ghcr.io/{0}-alpha', github.repository) || format('ghcr.io/{0}', github.repository) }}
+            ${{ contains(github.ref, 'alpha') && 'registry.si.icu/sijinhui/one-api/one-api-alpha' || 'registry.si.icu/sijinhui/one-api' }}
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v3
