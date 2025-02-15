@@ -26,6 +26,15 @@ const (
 
 func StreamHandler(c *gin.Context, resp *http.Response, relayMode int) (*model.ErrorWithStatusCode, string, *model.Usage) {
 	responseText := ""
+
+	// 增加错误修正
+    if resp == nil {
+        return nil, "", nil
+    }
+    if resp.Body == nil {
+        return nil, "", nil
+    }
+
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
 	var usage *model.Usage
