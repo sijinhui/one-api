@@ -39,6 +39,12 @@ func BuildFullURL(baseURLStr, requestURLStr string) (string, error) {
 		return "", err
 	}
 
+	// 解析请求URL（分离路径和查询参数）
+	req, err := url.ParseRequestURI(requestURLStr)
+	if err != nil {
+		return "", err
+	}
+
 	// 核心逻辑：检查路径中是否包含版本号段（如v3）
 	versionSegmentRegex := regexp.MustCompile(`^v\d+$`)
 	segments := strings.Split(strings.Trim(base.Path, "/"), "/")
@@ -50,13 +56,22 @@ func BuildFullURL(baseURLStr, requestURLStr string) (string, error) {
 		}
 	}
 
+	requestPath := req.Path
 	if hasVersion {
 		// 移除requestURL开头的版本号（如/v1）
-		modifiedPath := regexp.MustCompile(`^/v\d+`).ReplaceAllString(requestURLStr, "")
-		// 智能合并路径
-		base.Path = path.Join(base.Path, strings.TrimPrefix(modifiedPath, "/"))
-	} else {
-		base.Path = path.Join(base.Path, strings.TrimPrefix(requestURLStr, "/"))
+		requestPath = regexp.MustCompile(`^/v\d+`).ReplaceAllString(requestPath, "")
+	}
+
+	// 智能合并路径
+	base.Path = path.Join(base.Path, strings.TrimPrefix(requestPath, "/"))
+
+	// 保留原始查询参数
+	if req.RawQuery != "" {
+		if base.RawQuery == "" {
+			base.RawQuery = req.RawQuery
+		} else {
+			base.RawQuery += "&" + req.RawQuery
+		}
 	}
 
 	return base.String(), nil
