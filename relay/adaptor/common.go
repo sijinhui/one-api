@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"log"
 	"github.com/gin-gonic/gin"
 	"github.com/songquanpeng/one-api/common/client"
 	"github.com/songquanpeng/one-api/relay/meta"
@@ -49,40 +50,42 @@ func DoRequest(c *gin.Context, req *http.Request) (*http.Response, error) {
 	}
     contentType := resp.Header.Get("Content-Type")
     if strings.HasSuffix(contentType, "charset=utf-8") {
-        // [1] 透传流响应头
+        // 确认支持 Flusher
+        flusher, ok := c.Writer.(http.Flusher)
+        if !ok {
+            return nil, errors.New("streaming unsupported")
+        }
+
+        // 设置流式响应头（必须删除 Content-Length）
         c.Writer.Header().Del("Content-Length")
         c.Writer.Header().Set("Content-Type", "text/event-stream")
-        c.Writer.Header().Set("Cache-Control", "no-cache")
-        c.Writer.Header().Set("Connection", "keep-alive")
-        for k, v := range resp.Header {
-            c.Writer.Header().Set(k, strings.Join(v, ", "))
-        }
-        c.Writer.WriteHeader(resp.StatusCode)
+        c.Writer.WriteHeader(resp.StatusCode) // 提前发送状态码
 
-        // [2] 流式拷贝数据到客户端
+        // 优化缓冲区大小（根据上游数据特征调整）
+        buf := make([]byte, 128) // 128 字节缓冲区
         defer resp.Body.Close()
 
-
-        buf := make([]byte, 1024)  // Buffer to read chunks of data
         for {
             n, err := resp.Body.Read(buf)
             if n > 0 {
-                c.Writer.Write(buf[:n])  // Write the data to the client
-                c.Writer.Flush()          // Immediately flush it
+                if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+                    log.Println("[ERROR] Write error:", writeErr)
+                    break
+                }
+                flusher.Flush() // 每次读取后刷新
             }
             if err != nil {
                 if err != io.EOF {
-                    log.Println("Error while streaming:", err)
+                    log.Println("[ERROR] Read error:", err)
                 }
                 break
             }
         }
 
-        // 返回空的响应体（因其已被透传）
         return &http.Response{
             StatusCode: resp.StatusCode,
             Header:     resp.Header,
-        }, err
+        }, nil
     }
 
 	_ = req.Body.Close()
