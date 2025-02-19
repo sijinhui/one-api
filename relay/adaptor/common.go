@@ -3,8 +3,6 @@ package adaptor
 import (
 	"errors"
 	"fmt"
-	"strings"
-	"log"
 	"github.com/gin-gonic/gin"
 	"github.com/songquanpeng/one-api/common/client"
 	"github.com/songquanpeng/one-api/relay/meta"
@@ -48,45 +46,46 @@ func DoRequest(c *gin.Context, req *http.Request) (*http.Response, error) {
 	if resp == nil {
 		return nil, errors.New("resp is nil")
 	}
-    contentType := resp.Header.Get("Content-Type")
-    if strings.HasSuffix(contentType, "charset=utf-8") {
-        // 确认支持 Flusher
-        flusher, ok := c.Writer.(http.Flusher)
-        if !ok {
-            return nil, errors.New("streaming unsupported")
-        }
-
-        // 设置流式响应头（必须删除 Content-Length）
-        c.Writer.Header().Del("Content-Length")
-        c.Writer.Header().Set("Content-Type", "text/event-stream")
-        c.Writer.WriteHeader(resp.StatusCode) // 提前发送状态码
-
-        // 优化缓冲区大小（根据上游数据特征调整）
-        buf := make([]byte, 128) // 128 字节缓冲区
-        defer resp.Body.Close()
-
-        for {
-            n, err := resp.Body.Read(buf)
-            if n > 0 {
-                if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
-                    log.Println("[ERROR] Write error:", writeErr)
-                    break
-                }
-                flusher.Flush() // 每次读取后刷新
-            }
-            if err != nil {
-                if err != io.EOF {
-                    log.Println("[ERROR] Read error:", err)
-                }
-                break
-            }
-        }
-
-        return &http.Response{
-            StatusCode: resp.StatusCode,
-            Header:     resp.Header,
-        }, nil
-    }
+// // 判断响应是否支持流式传输，主要是火山引擎的响应格式不标准，备用
+//     contentType := resp.Header.Get("Content-Type")
+//     if strings.HasSuffix(contentType, "charset=utf-8") {
+//         // 确认支持 Flusher
+//         flusher, ok := c.Writer.(http.Flusher)
+//         if !ok {
+//             return nil, errors.New("streaming unsupported")
+//         }
+//
+//         // 设置流式响应头（必须删除 Content-Length）
+//         c.Writer.Header().Del("Content-Length")
+//         c.Writer.Header().Set("Content-Type", "text/event-stream")
+//         c.Writer.WriteHeader(resp.StatusCode) // 提前发送状态码
+//
+//         // 优化缓冲区大小（根据上游数据特征调整）
+//         buf := make([]byte, 128) // 128 字节缓冲区
+//         defer resp.Body.Close()
+//
+//         for {
+//             n, err := resp.Body.Read(buf)
+//             if n > 0 {
+//                 if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+//                     log.Println("[ERROR] Write error:", writeErr)
+//                     break
+//                 }
+//                 flusher.Flush() // 每次读取后刷新
+//             }
+//             if err != nil {
+//                 if err != io.EOF {
+//                     log.Println("[ERROR] Read error:", err)
+//                 }
+//                 break
+//             }
+//         }
+//
+//         return &http.Response{
+//             StatusCode: resp.StatusCode,
+//             Header:     resp.Header,
+//         }, nil
+//     }
 
 	_ = req.Body.Close()
 	_ = c.Request.Body.Close()
