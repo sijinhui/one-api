@@ -5,6 +5,13 @@ export const CHANNEL_OPTIONS = {
     value: 1,
     color: 'success'
   },
+  50: {
+    key: 50,
+    text: 'OpenAI 兼容',
+    value: 50,
+    color: 'olive',
+    description: 'OpenAI 兼容渠道，支持设置 Base URL',
+  },
   14: {
     key: 14,
     text: 'Anthropic Claude',
@@ -16,6 +23,13 @@ export const CHANNEL_OPTIONS = {
     text: 'AWS',
     value: 33,
     color: 'primary'
+  },
+  51: {
+    key: 51,
+    text: 'Gemini (OpenAI)',
+    value: 51,
+    color: 'orange',
+    description: 'Gemini OpenAI 兼容格式',
   },
   37: {
     key: 37,
@@ -185,7 +199,7 @@ export const CHANNEL_OPTIONS = {
     value: 45,
     color: 'primary'
   },
-  45: {
+  46: {
     key: 46,
     text: 'Replicate',
     value: 46,
