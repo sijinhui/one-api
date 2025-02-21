@@ -9,7 +9,7 @@ export const CHANNEL_OPTIONS = {
     key: 50,
     text: 'OpenAI 兼容',
     value: 50,
-    color: 'olive',
+    color: 'success',
     description: 'OpenAI 兼容渠道，支持设置 Base URL',
   },
   14: {
