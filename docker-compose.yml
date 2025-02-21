@@ -7,8 +7,9 @@ services:
     container_name: one-api
     restart: always
     command: --log-dir /app/logs
-    ports:
-      - "3000:3000"
+    network_mode: "host"
+#    ports:
+#      - "3000:3000"
     volumes:
       - ./data/oneapi:/data
       - ./logs:/app/logs
