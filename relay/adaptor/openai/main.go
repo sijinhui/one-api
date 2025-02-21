@@ -19,22 +19,13 @@ import (
 )
 
 const (
-	dataPrefix       = "data: "
+	dataPrefix       = "data:"
 	done             = "[DONE]"
 	dataPrefixLength = len(dataPrefix)
 )
 
 func StreamHandler(c *gin.Context, resp *http.Response, relayMode int) (*model.ErrorWithStatusCode, string, *model.Usage) {
 	responseText := ""
-
-	// 增加错误修正
-    if resp == nil {
-        return nil, "", nil
-    }
-    if resp.Body == nil {
-        return nil, "", nil
-    }
-
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
 	var usage *model.Usage
@@ -47,17 +38,18 @@ func StreamHandler(c *gin.Context, resp *http.Response, relayMode int) (*model.E
 		if len(data) < dataPrefixLength { // ignore blank line or wrong format
 			continue
 		}
-        if data[:dataPrefixLength] != dataPrefix {
-            if strings.HasPrefix(data, done) {
+		if data[:dataPrefixLength] != dataPrefix && data[:dataPrefixLength] != done {
+			continue
+        } else {
+            payload := strings.TrimLeft(data[dataPrefixLength:], " ")
+            // 这里处理标准的data:开头，标准化为 data: + 单空格格式
+            data = dataPrefix + " " + strings.TrimLeft(payload, " ")
+            if strings.HasPrefix(payload, done) {
                 render.StringData(c, data)
                 doneRendered = true
+                continue
             }
-            continue
-        } else {
-            // 这里处理标准的data:开头，标准化为 data: + 单空格格式
-            data = dataPrefix + " " + strings.TrimLeft(data[len(dataPrefix):], " ")
         }
-
 		switch relayMode {
 		case relaymode.ChatCompletions:
 			var streamResponse ChatCompletionsStreamResponse
