@@ -27,6 +27,9 @@ const (
 func StreamHandler(c *gin.Context, resp *http.Response, relayMode int) (*model.ErrorWithStatusCode, string, *model.Usage) {
 	responseText := ""
 	scanner := bufio.NewScanner(resp.Body)
+    // 设置自定义缓冲区大小（例如1MB）
+    scanner.Buffer(nil, 1<<20)  // 1<<20 = 1MB（二进制表达式，Go常用写法）
+
 	scanner.Split(bufio.ScanLines)
 	var usage *model.Usage
 
