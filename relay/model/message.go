@@ -9,6 +9,11 @@ type Message struct {
 	ToolCallId       string  `json:"tool_call_id,omitempty"`
 }
 
+type GoogleThink struct {
+	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	Type         string `json:"type,omitempty"`
+}
+
 func (m Message) IsStringContent() bool {
 	_, ok := m.Content.(string)
 	return ok
