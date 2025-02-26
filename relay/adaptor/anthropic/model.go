@@ -29,6 +29,11 @@ type Message struct {
 	Content []Content `json:"content"`
 }
 
+type GoogleThink struct {
+	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	Type         string `json:"type,omitempty"`
+}
+
 type Tool struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description,omitempty"`
@@ -42,17 +47,18 @@ type InputSchema struct {
 }
 
 type Request struct {
-	Model         string    `json:"model"`
-	Messages      []Message `json:"messages"`
-	System        string    `json:"system,omitempty"`
-	MaxTokens     int       `json:"max_tokens,omitempty"`
-	StopSequences []string  `json:"stop_sequences,omitempty"`
-	Stream        bool      `json:"stream,omitempty"`
-	Temperature   *float64  `json:"temperature,omitempty"`
-	TopP          *float64  `json:"top_p,omitempty"`
-	TopK          int       `json:"top_k,omitempty"`
-	Tools         []Tool    `json:"tools,omitempty"`
-	ToolChoice    any       `json:"tool_choice,omitempty"`
+	Model         string       `json:"model"`
+	Messages      []Message    `json:"messages"`
+	System        string       `json:"system,omitempty"`
+	MaxTokens     int          `json:"max_tokens,omitempty"`
+	StopSequences []string     `json:"stop_sequences,omitempty"`
+	Stream        bool         `json:"stream,omitempty"`
+	Temperature   *float64     `json:"temperature,omitempty"`
+	Thinking      *GoogleThink `json:"thinking,omitempty"`
+	TopP          *float64     `json:"top_p,omitempty"`
+	TopK          int          `json:"top_k,omitempty"`
+	Tools         []Tool       `json:"tools,omitempty"`
+	ToolChoice    any          `json:"tool_choice,omitempty"`
 	//Metadata    `json:"metadata,omitempty"`
 }
 

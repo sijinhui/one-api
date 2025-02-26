@@ -61,6 +61,7 @@ func ConvertRequest(textRequest model.GeneralOpenAIRequest) *Request {
 		TopK:        textRequest.TopK,
 		Stream:      textRequest.Stream,
 		Tools:       claudeTools,
+		Thinking:    (*GoogleThink)(textRequest.Thinking),
 	}
 	if len(claudeTools) > 0 {
 		claudeToolChoice := struct {
